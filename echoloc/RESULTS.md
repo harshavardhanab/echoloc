@@ -23,6 +23,10 @@ Event-level evidence at the known spots is real:
 
 ## Verdict
 Confirms a suspected location; does not find an unknown one from 25 min of webcam audio.
+This is a modified version of the video's approach: it scores every flight's modelled curve at
+every grid point, without the video's explicit per-event measurements (fitted speed and CPA
+distance), flight-pair filtering or silence filter. The result describes this pipeline on these
+inputs, not the video's procedure.
 Only 3–5 aircraft are clearly audible per stream, and airport traffic follows the same few
 corridors, so a handful of passes constrains distance-to-track but leaves a strip of positions
 along it. Against ~186k (position, lag) hypotheses that is not enough to stand out from chance.
@@ -48,20 +52,24 @@ detected flyovers first, prop-only ADS-B, and exact timestamps.
 
 | Check | Result |
 |---|---|
-| Measured non-jet approaches heard at the nest in 3 h | **none within 2 km**; 1 within 4 km (P28A, 3.5 km); 16 within 12 km (repeat passes counted, tracks split at ADS-B gaps > 60 s) |
+| Measured non-jet approaches heard at the nest in 3 h | **none measured within 2 km** (the archive has coverage gaps, so unmeasured passes are possible); 1 within 4 km (P28A, 3.5 km); 16 within 12 km (repeat passes counted, tracks split at ADS-B gaps > 60 s) |
 | Detections that line up with a real approach | 1 of 25 within ±5 s, 3 within ±30 s; slid-clock null p ≈ 0.4–0.5, i.e. chance |
 | Helicopter (AS50) | a first pass at the gap-free audio looked like a 1.8 km match, but that CPA was interpolated across a 20 min ADS-B gap; its only measured approach (2.6 km) sits at the edge of another gap and is excluded |
-| Strongest 5 detections | no ADS-B approach within 12 km: aircraft without ADS-B in the archive, or not aircraft |
+| Strongest 5 detections | no measured ADS-B approach within 12 km; this run cannot tell whether they are untracked aircraft, tracked aircraft hidden by coverage gaps, or not aircraft |
 | Known-point check (`search --point`), top-2 pair | 0 candidates: the fitted speeds/distances fall outside dopplertrack's ±35 % / 0.4–2.5× gates for every real flight |
 | Blind pair search, Nov 2 traces | best score 7.99, **14.7 km** off; implies the clock is off by −1.1 h vs the segment stamps → rejected |
 | Wrong-day null, Nov 1 traces | best score 7.92 (as high as the real day), 16.1 km off; implies −27.4 h → rejected |
 
-Verdict: **no location from this window.** It failed at the input, not the search: in this 3 h
-weekday-morning window no ADS-B-visible light aircraft was measured passing within 2 km of the
-camera, and the loud flyovers that were detected are not in the ADS-B archive. The blind search
-still produced a confident-looking answer (the wrong day's data scored as well), and the
-timestamp check rejects it. Any blind result should be
-checked against the recording's own clock. dopplertrack's eagle-cam success used 12 h of audio;
+Verdict: **no supported location from this recording and ADS-B data.** This run follows the
+video's method much more closely (detected flyovers, flight-pair search with speed/distance gates
+and a silence filter), but it is one 3 h window. No ADS-B-visible light aircraft was measured
+passing within 2 km of the camera, and the strongest detections have no measured approach within
+12 km; coverage gaps mean neither shows that nothing passed nearby. The blind search still
+produced a confident-looking answer, but the wrong day's data scored as well and the implied clock
+contradicts the stream's stamps, so the answer is unsupported. That does not say what the detected
+sounds were (noise, untracked aircraft, or aircraft whose fitted curves are off). It shows an
+unsuccessful localization on these inputs, not a limitation of the video's full procedure. Any
+blind result should be checked against the recording's own clock. dopplertrack's eagle-cam success used 12 h of audio;
 a fair retest needs a longer window (or several) and a camera under a busier pattern.
 
 Reproduce:

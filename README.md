@@ -23,18 +23,23 @@ Full write-up: [echoloc/RESULTS.md](echoloc/RESULTS.md).
 | Heathrow webcam, 25 min live, blind 14 × 14 km search | best guess **6.1 km** off; true spot ranked 113–226 of 5041 |
 | Midway webcam, 25 min live, blind | best guess **1.3–2.3 km** off; true spot ranked ~120 of 5041 |
 | Lisbon webcam, 25 min live, blind | a deliberately wrong clock scored higher than the real one |
-| SWFL eagle cam (prop traffic), 3 h rewind, dopplertrack pair search | no location: 14.7 km off, rejected by the timestamp check; no measured non-jet pass within 2 km in 3 h |
+| SWFL eagle cam (prop traffic), 3 h rewind, dopplertrack pair search | no supported location: best guess 14.7 km off, rejected by the timestamp check; no non-jet pass measured within 2 km in 3 h |
 
 Verdict: **it confirms a suspected location but does not find an unknown one** from 25 minutes
 of airport-webcam audio. At the true spots the matched filter clearly picks out individual flights
 (e.g. three Heathrow departures at ~400 m, well above the noise ceiling), but 3–5 audible passes
 along the same runway corridors are not enough to stand out against ~186,000
 (position, stream-delay) hypotheses. Every blind result is checked against a deliberately wrong
-clock (+397 s); that null test is what exposed the failure.
+clock (+397 s); that null test is what exposed the failure. This pipeline is a modified version
+of the video's approach (it lacks the video's explicit event measurements, flight-pair filtering
+and silence filter), so the result is about this pipeline, not the video's method.
 
-A 3-hour prop-traffic follow-up with dopplertrack's flyover-first pair search also failed. Almost
-no ADS-B-visible light aircraft passed near the camera in that window, and the blind answer
-(14.7 km off) was caught only by checking it against the stream's own timestamps.
+A 3-hour prop-traffic follow-up with dopplertrack's flyover-first pair search, which is much
+closer to the video's method, also gave no supported location. No ADS-B-visible light aircraft
+was measured within 2 km of the camera (the archive has coverage gaps), and the blind answer
+(14.7 km off) scored no better than the wrong day's data and contradicted the stream's own
+timestamps. That is an unsuccessful localization on these inputs, not evidence against the
+video's full procedure.
 
 ## How it works
 
@@ -127,9 +132,10 @@ Outputs go to `echoloc/data/`, which is not committed.
   eagle-cam stream near a flight school.
 
 Both drop or down-rank jets and work from detected flyovers rather than scoring every flight at
-every point. That is the most likely reason they succeed where this repo's airport-webcam test
-did not. A 3-hour run of dopplertrack on a prop-traffic cam also found nothing, for lack of nearby
-ADS-B-visible traffic (see [RESULTS.md](echoloc/RESULTS.md)); its own eagle-cam success used 12 h.
+every point. That may be why they succeed where this repo's airport-webcam test did not. A
+3-hour run of dopplertrack on a prop-traffic cam also gave no supported location, with no
+non-jet ADS-B approach measured within 2 km (see [RESULTS.md](echoloc/RESULTS.md)); its own
+eagle-cam success used 12 h.
 
 ## Responsible use
 
