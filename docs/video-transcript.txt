@@ -1,0 +1,2398 @@
+00:00 I have found off-grid structures in the
+00:02 
+
+00:02 middle of a rainforest, things 600
+00:04 
+
+00:04 meters deep in the ocean and some stuff
+00:06 
+
+00:06 I can't even share on YouTube. But what
+00:08 
+
+00:08 I'm going to share today is no
+00:10 
+
+00:10 exaggeration the single most powerful
+00:13 
+
+00:13 geoloccation clue I've come across. And
+00:15 
+
+00:15 to illustrate this, I'm going to
+00:17 
+
+00:17 geoloccate this. It's a video, but
+00:20 
+
+00:20 nothing really changes visually. If you
+00:22 
+
+00:22 want to pause and try it yourself, it's
+00:24 
+
+00:24 linked in the description. The only
+00:26 
+
+00:26 information you have is [music] that it
+00:27 
+
+00:27 was filmed September 8th somewhere in
+00:30 
+
+00:30 the continental US. That's all you get.
+00:33 
+
+00:33 But with that information, [music] it is
+00:35 
+
+00:35 possible. And I'm going to show exactly
+00:37 
+
+00:37 how.
+00:42 
+
+00:42 So, I did a video geoloccating with
+00:43 
+
+00:43 thunder sounds. The benefit is that they
+00:45 
+
+00:45 travel really far and they penetrate
+00:47 
+
+00:47 structures extremely well. The downside
+00:49 
+
+00:49 is that we were only able to get about 5
+00:51 
+
+00:51 km precision. [music] that could tell
+00:52 
+
+00:52 you basically what city it was filmed in
+00:54 
+
+00:54 and maybe what side of town. What we're
+00:56 
+
+00:56 using today has those same benefits, but
+00:59 
+
+00:59 here's the precision.
+01:07 
+
+01:07 So, I'm going to play you two sections
+01:08 
+
+01:08 of audio. One has the information
+01:10 
+
+01:10 required to find this location. The
+01:12 
+
+01:12 other does not. See if you can tell
+01:14 
+
+01:14 which one does.
+01:26 
+
+01:26 You probably couldn't tell because it's
+01:28 
+
+01:28 completely inaudible, but if I open this
+01:30 
+
+01:30 in a spectrogram here, we can see all
+01:32 
+
+01:32 the frequencies. So, if you're not
+01:33 
+
+01:33 familiar with a spectrogram, the xaxis
+01:36 
+
+01:36 is time and the y-axis is frequency.
+01:38 
+
+01:38 Now, even with this, you still really
+01:40 
+
+01:40 can't see anything. It's only when I
+01:42 
+
+01:42 zoom into the right frequency and then
+01:44 
+
+01:44 increase the resolution that you start
+01:46 
+
+01:46 to see it. I'll do one more.
+01:51 
+
+01:51 This is a Doppler curve from an
+01:53 
+
+01:53 aircraft, and it's what we're going to
+01:54 
+
+01:54 use to locate this video.
+01:57 
+
+01:57 Now, fair warning, this is insanely
+01:59 
+
+01:59 powerful, but it also requires a lot of
+02:01 
+
+02:01 complex stuff. This took me months to
+02:04 
+
+02:04 build, over 5,000 lines of code. I was
+02:06 
+
+02:06 working with 50 GB Park files, 3D
+02:09 
+
+02:09 physics modeling, countrywide DEMs, and
+02:11 
+
+02:11 so much more. That's all to say. This is
+02:13 
+
+02:13 going to be a long video, but I'm going
+02:15 
+
+02:15 to explain every step in a way that
+02:17 
+
+02:17 anyone can understand it, even if you
+02:18 
+
+02:18 know nothing about any of this stuff.
+02:20 
+
+02:20 So, with that out of the way, let's look
+02:22 
+
+02:22 at the rest of this audio. We have one
+02:24 
+
+02:24 Doppler curve here. If I keep going to
+02:26 
+
+02:26 the right, you can see another one. It's
+02:28 
+
+02:28 a lot louder, and you can also see the
+02:30 
+
+02:30 harmonics on top. I'll zoom out a bit. I
+02:33 
+
+02:33 think we have one more here. So, these
+02:36 
+
+02:36 two are what we'll be using. But, let's
+02:38 
+
+02:38 take a step back. Why do we even care
+02:39 
+
+02:39 about Doppler curves? What are we going
+02:41 
+
+02:41 to be using these for? So, there's
+02:43 
+
+02:43 something called ADSB data, and it's
+02:45 
+
+02:45 data on pretty much every plane in the
+02:47 
+
+02:47 sky. Its position, speed, altitude, and
+02:50 
+
+02:50 a bunch of other things. So, my first
+02:52 
+
+02:52 thought was, could I narrow this down to
+02:53 
+
+02:53 only places that heard a plane, and then
+02:56 
+
+02:56 920 seconds later another one? To do
+02:59 
+
+02:59 that, we need all this ADSB data first.
+03:02 
+
+03:02 They have an API you can pay for.
+03:04 
+
+03:04 There's also a Python package just to
+03:06 
+
+03:06 scrape the data, but it's massive. So, I
+03:08 
+
+03:08 ran this for a few hours to get all the
+03:10 
+
+03:10 flights in the continental US on
+03:13 
+
+03:13 September 8th. Now, here's what that
+03:14 
+
+03:14 data looks like. By default, it
+03:16 
+
+03:16 downloads the entire flight path. That's
+03:18 
+
+03:18 why you see things going to Hawaii over
+03:20 
+
+03:20 here or other countries. But anything
+03:22 
+
+03:22 that flew over the US on that day is in
+03:25 
+
+03:25 this data set, including the two planes
+03:28 
+
+03:28 in our recording. So, now we just need
+03:30 
+
+03:30 to find them. So, like I said, I want to
+03:31 
+
+03:31 narrow down to the locations that heard
+03:33 
+
+03:33 a plane and then 920 seconds later
+03:36 
+
+03:36 another one. Now, these Doppler curves
+03:38 
+
+03:38 are made by a plane, of course, but
+03:40 
+
+03:40 specifically a propeller plane. I
+03:41 
+
+03:41 boosted some frequencies so you can hear
+03:43 
+
+03:43 it better. Let me play you a bit of the
+03:44 
+
+03:44 louder one, and you can hear pretty
+03:45 
+
+03:45 intuitively that it's a propeller plane.
+03:55 
+
+03:55 One of the fields in the ADSB data is
+03:58 
+
+03:58 type code. Now, this doesn't say
+03:59 
+
+03:59 propeller versus jetplane, but I did
+04:02 
+
+04:02 some research, found this lookup table,
+04:04 
+
+04:04 and this does. Now there's some missing
+04:05 
+
+04:05 data in that lookup table. So instead of
+04:07 
+
+04:07 filtering to the propeller planes, I
+04:09 
+
+04:09 just filtered out all the known jet
+04:11 
+
+04:11 types. But after doing that, the map
+04:13 
+
+04:13 looks like this.
+04:17 
+
+04:17 But now time for this time offset
+04:18 
+
+04:18 filter. So I'll do this on a small area
+04:21 
+
+04:21 to illustrate first. This pink line is
+04:23 
+
+04:23 the ADSB data for one flight. You can
+04:25 
+
+04:25 see the individual flight points here
+04:27 
+
+04:27 where we have coordinates, altitude,
+04:29 
+
+04:29 time stamp, things like that. What we do
+04:31 
+
+04:31 is lay a 200 meter grid of points and
+04:34 
+
+04:34 then for each point note the time that
+04:36 
+
+04:36 it would have heard this flight. Now
+04:38 
+
+04:38 it's time for our first new terminology.
+04:40 
+
+04:40 CPA, not that one. Closest point of
+04:44 
+
+04:44 arrival. So for an observer, say here,
+04:47 
+
+04:47 CPA is where the plane is closest to
+04:50 
+
+04:50 that observer. The reason that's
+04:51 
+
+04:51 important is when we say heard a plane
+04:54 
+
+04:54 920 seconds later, hearing a plane is
+04:56 
+
+04:56 not really a single point in time. If
+04:59 
+
+04:59 you're standing at this point, you hear
+04:60 
+
+05:00 the plane here and here and here. This
+05:03 
+
+05:03 whole Doppler curve is almost 2 minutes.
+05:05 
+
+05:05 So, what we need to use is the CPA time,
+05:07 
+
+05:07 which is roughly the middle of this.
+05:09 
+
+05:09 It's when the plane was closest and
+05:10 
+
+05:10 loudest. So, for this flight, lay a 200
+05:13 
+
+05:13 m grid of points. I did a pretty
+05:14 
+
+05:14 conservative 10 km radius. Like, beyond
+05:17 
+
+05:17 that, you probably wouldn't hear a plane
+05:18 
+
+05:18 even in like ideal conditions. So,
+05:20 
+
+05:20 that's just make sure we don't miss
+05:21 
+
+05:21 anything. And then for each one of these
+05:23 
+
+05:23 points, we note the CPA time for this
+05:26 
+
+05:26 flight. Two important things here. First
+05:28 
+
+05:28 is that CPA time actually means the time
+05:31 
+
+05:31 when the plane was closest. For this
+05:34 
+
+05:34 example, that would be probably this
+05:35 
+
+05:35 point. So 22 46 36. That's actually not
+05:39 
+
+05:39 what we need, though. Now, for the
+05:41 
+
+05:41 second terminology, what we need is the
+05:43 
+
+05:43 delayed CPA time. It's the time that the
+05:46 
+
+05:46 CPA would have been heard by an
+05:48 
+
+05:48 observer. And that's because the sound
+05:50 
+
+05:50 has to travel from here all the way 3
+05:53 
+
+05:53 plus kilometers to a listener. That was
+05:55 
+
+05:55 the first important thing. The second is
+05:57 
+
+05:57 that planes are in the sky. Meaning the
+05:60 
+
+06:00 distance that we use in this calc needs
+06:02 
+
+06:02 to be the slant distance, not just the
+06:04 
+
+06:04 horizontal distance. Luckily, the ADSB
+06:07 
+
+06:07 data gives the plane's altitude.
+06:09 
+
+06:09 However, altitude is not the height
+06:11 
+
+06:11 above the ground. Altitude is the height
+06:13 
+
+06:13 above sea level. So to get this slant
+06:15 
+
+06:15 distance, we actually need to know the
+06:17 
+
+06:17 elevation for each grid point. And to do
+06:19 
+
+06:19 that, we'll use a DEM. That'll tell us
+06:22 
+
+06:22 at any point the elevation.
+06:26 
+
+06:26 So now with that we can actually say for
+06:28 
+
+06:28 our point here for this flight the CPA
+06:30 
+
+06:30 time of 224634
+06:33 
+
+06:33 but the delayed CPA time of 224646.
+06:38 
+
+06:38 So we do this for every point here and
+06:40 
+
+06:40 that's one flight done. Then we just do
+06:42 
+
+06:42 that for all flights in the area and
+06:44 
+
+06:44 we're left with this grid of points
+06:46 
+
+06:46 because basically every point heard at
+06:47 
+
+06:47 least one flight especially since I gave
+06:49 
+
+06:49 the 10 km radius. But for each of these
+06:52 
+
+06:52 here, let me zoom in on one. For each of
+06:54 
+
+06:54 these, what I have is a list of flight
+06:56 
+
+06:56 IDs and the associated delayed CPA
+06:58 
+
+06:58 times. Basically, if you were standing
+06:60 
+
+06:60 here on this day, at each of these
+07:02 
+
+07:02 times, you could look up and you could
+07:03 
+
+07:03 hear a plane. So, back to our goal. What
+07:05 
+
+07:05 we want is somewhere that heard a plane
+07:07 
+
+07:07 and then 920 seconds later heard another
+07:10 
+
+07:10 one. So for each of these points, we
+07:11 
+
+07:11 then just check for that offset. Here's
+07:13 
+
+07:13 what that actually looks like. So here's
+07:14 
+
+07:14 an example point and each of those
+07:16 
+
+07:16 delayed CPA times. And then we have a
+07:18 
+
+07:18 920 second offset window. And we just
+07:20 
+
+07:20 look here. Nothing. 920 seconds later.
+07:26 
+
+07:26 This one again. Not quite. And then this
+07:28 
+
+07:28 one over here. There we go. Now, when we
+07:31 
+
+07:31 say 920 seconds apart, it matters where
+07:34 
+
+07:34 we're measuring from. Like are you
+07:35 
+
+07:35 calling the center here or here or here?
+07:38 
+
+07:38 And that's like a plus or minus 5second
+07:40 
+
+07:40 variance. So that's why if you look
+07:42 
+
+07:42 closely on this, there's a bit of wiggle
+07:44 
+
+07:44 room that we're allowing for in that 920
+07:46 
+
+07:46 second offset. But anyway, that's the
+07:48 
+
+07:48 methodology. So how many of our points
+07:50 
+
+07:50 survived that filter? It's about 35,000.
+07:54 
+
+07:54 And that's for this small test area,
+07:56 
+
+07:56 which is less than 0.05%
+07:58 
+
+07:58 of the continental US land area that we
+08:00 
+
+08:00 need to search. Like just a side
+08:02 
+
+08:02 tangent, I don't think people understand
+08:04 
+
+08:04 how much land area there is in the US.
+08:06 
+
+08:06 If you divided the continental US into a
+08:08 
+
+08:08 bunch of football fields and laid them
+08:10 
+
+08:10 end to end, it would wrap all the way
+08:12 
+
+08:12 around the Earth and to the moon and
+08:15 
+
+08:15 back almost 200 times. That's what we're
+08:19 
+
+08:19 searching for this. So, we need to do a
+08:23 
+
+08:23 lot better and we can, but we need to
+08:25 
+
+08:25 know some things about Doves.
+08:28 
+
+08:28 All jokes aside, this is actually so
+08:30 
+
+08:30 cool. Doppler curves will give us a ton
+08:32 
+
+08:32 of additional information and I actually
+08:34 
+
+08:34 don't need to teach you anything because
+08:36 
+
+08:36 you already know this intuitively. Let
+08:38 
+
+08:38 me play you two clips.
+08:47 
+
+08:47 You can already tell that clip 2 was
+08:49 
+
+08:49 going faster. The reason is because the
+08:51 
+
+08:51 drop in frequency was much larger. And
+08:53 
+
+08:53 that drop in frequency can actually tell
+08:55 
+
+08:55 us the exact speed that an object was
+08:57 
+
+08:57 going. So assuming linear constant
+08:59 
+
+08:59 velocity, there are only two things that
+09:01 
+
+09:01 determine what this Doppler curve looks
+09:03 
+
+09:03 like. The velocity determines how big of
+09:05 
+
+09:05 a frequency drop. And our CPA distance,
+09:08 
+
+09:08 remember that one, determines how
+09:09 
+
+09:09 quickly that drop occurs. So for the
+09:12 
+
+09:12 Doppler curve in our audio, we can fit a
+09:15 
+
+09:15 curve to that and know how fast the
+09:16 
+
+09:16 aircraft was going and how far away it
+09:19 
+
+09:19 was from the listener. So now instead of
+09:21 
+
+09:21 filtering to points that hurt an
+09:23 
+
+09:23 aircraft and then 920 seconds later
+09:25 
+
+09:25 heard another one, we can filter to
+09:27 
+
+09:27 points that heard an aircraft going a
+09:29 
+
+09:29 certain speed at a certain CPA distance
+09:32 
+
+09:32 and then 920 seconds later heard another
+09:34 
+
+09:34 plane going a certain speed at a certain
+09:37 
+
+09:37 CPA distance. That's a lot more
+09:39 
+
+09:39 constraining. So let's measure one of
+09:41 
+
+09:41 the Doppler curves. You can see that the
+09:43 
+
+09:43 velocity makes the frequency drop larger
+09:45 
+
+09:45 and then the CPA slant distance just
+09:47 
+
+09:47 changes how quickly that that drop
+09:49 
+
+09:49 occurs. What you'll notice on this one
+09:50 
+
+09:50 is that it doesn't fit a perfect Doppler
+09:52 
+
+09:52 curve though like this right hand side
+09:54 
+
+09:54 does. Left hand side not so much.
+09:57 
+
+09:57 That'll be important later. But what we
+09:59 
+
+09:59 do in the meantime is we just take a
+10:01 
+
+10:01 pretty generous range for velocity so
+10:03 
+
+10:03 that we don't accidentally filter
+10:04 
+
+10:04 anything out. So here's kind of a decent
+10:06 
+
+10:06 fit on the right side at 100 m/s. I
+10:09 
+
+10:09 can't confidently say this plane was
+10:10 
+
+10:10 going exactly 100, but we can be pretty
+10:13 
+
+10:13 sure it wasn't going 70. Similarly for
+10:15 
+
+10:15 the time offset, there's still a couple
+10:17 
+
+10:17 seconds of like potential measurement
+10:19 
+
+10:19 error here. Okay, best match 15115. I'll
+10:22 
+
+10:22 move it to 15113. Slide that fundamental
+10:25 
+
+10:25 frequency up a little bit. And like,
+10:27 
+
+10:27 yeah, you know, that could work. That's
+10:28 
+
+10:28 just to say we still can't pin down the
+10:30 
+
+10:30 offset time precisely to the second. But
+10:33 
+
+10:33 we do this for event one and event two,
+10:35 
+
+10:35 and we get the measurement ranges for
+10:37 
+
+10:37 each. So, the first thing is the speed
+10:39 
+
+10:39 filters. Here are all of the prop
+10:41 
+
+10:41 flights, but here are all the ones
+10:43 
+
+10:43 matching the event one velocity range.
+10:46 
+
+10:46 And then in pink, here are the same ones
+10:47 
+
+10:47 before event two. So now what we're
+10:49 
+
+10:49 looking for is a point that heard a
+10:51 
+
+10:51 green line and then 920 seconds later
+10:54 
+
+10:54 heard a pink line. But remember, the
+10:56 
+
+10:56 other thing we know about this too, in
+10:58 
+
+10:58 addition to the velocity, is the
+10:59 
+
+10:59 distance away. So on this green line for
+11:02 
+
+11:02 event one, we don't need to lay that
+11:04 
+
+11:04 entire grid from 0 to 10 km away. We
+11:07 
+
+11:07 know the pretty precise slant distance
+11:09 
+
+11:09 that the observer was from each of
+11:11 
+
+11:11 these. So, here are those points.
+11:13 
+
+11:13 They're about 73,000.
+11:15 
+
+11:15 But if I zoom into any of these
+11:17 
+
+11:17 clusters, what do you notice?
+11:20 
+
+11:20 Airport.
+11:23 
+
+11:23 Another airport. Most of those 73,000
+11:26 
+
+11:26 points are just near airports. And it
+11:28 
+
+11:28 makes sense cuz that's where the planes
+11:30 
+
+11:30 are. More air traffic just means higher
+11:32 
+
+11:32 chance that you happen to have two
+11:34 
+
+11:34 flights that meet those criteria. But
+11:36 
+
+11:36 the signal in our video is not only what
+11:38 
+
+11:38 we hear, it's also what we don't hear.
+11:41 
+
+11:41 There's no Doppler curve between these
+11:43 
+
+11:43 two. That's almost 15 minutes of not
+11:46 
+
+11:46 hearing a plane. You're not going to get
+11:48 
+
+11:48 that right outside of a major airport.
+11:50 
+
+11:50 And that's part of why this is so useful
+11:52 
+
+11:52 cuz if you're near an airport, you hear
+11:54 
+
+11:54 a lot of flights and you get a lot of
+11:55 
+
+11:55 signal. If you're not, then the silence
+11:57 
+
+11:57 itself is also a signal. So it really
+11:59 
+
+11:59 works anywhere on that spectrum. So,
+12:02 
+
+12:02 what that means for our search, I'll
+12:04 
+
+12:04 take all of these 73,000 points and I'll
+12:07 
+
+12:07 apply a silence filter. Feel free to
+12:09 
+
+12:09 pause here if you're interested in the
+12:10 
+
+12:10 specific thresholds and logic I used,
+12:13 
+
+12:13 but overall I just disqualified any
+12:14 
+
+12:14 point that would have hurt a flight
+12:16 
+
+12:16 between our two events, and I was pretty
+12:18 
+
+12:18 conservative with the thresholds. So, to
+12:20 
+
+12:20 recap, we took our velocity filtered
+12:22 
+
+12:22 flight segments for event one and event
+12:24 
+
+12:24 two, laid candidate points based on the
+12:26 
+
+12:26 slant distance range from the Doppler
+12:28 
+
+12:28 curve measurements. Then for all those
+12:30 
+
+12:30 candidate points did the time offset
+12:32 
+
+12:32 filter where that point would hear a
+12:34 
+
+12:34 flight of the right speed at the right
+12:36 
+
+12:36 distance away and then 920 seconds later
+12:39 
+
+12:39 hear another flight of the right speed
+12:41 
+
+12:41 at the right distance away. That gave us
+12:43 
+
+12:43 this roughly 70,000 points. Now adding
+12:46 
+
+12:46 on to all that logic the silence filter
+12:48 
+
+12:48 where that point doesn't hear another
+12:49 
+
+12:49 flight between the two events that drops
+12:52 
+
+12:52 the 70,000 to
+12:56 
+
+12:56 15,000.
+12:57 
+
+12:57 Even with all those constraints, there's
+12:60 
+
+12:60 just so much land area and so many
+13:02 
+
+13:02 flights that 15,000 points still meet
+13:05 
+
+13:05 all those criteria. And usually at this
+13:07 
+
+13:07 point in a search, I would just start
+13:09 
+
+13:09 looking at some of the points, seeing
+13:10 
+
+13:10 why they don't work, and then encoding
+13:13 
+
+13:13 that logic as another filter. The
+13:15 
+
+13:15 problem here is we just have this
+13:17 
+
+13:17 picture. There's nothing else we can get
+13:19 
+
+13:19 from this. And we use pretty much
+13:21 
+
+13:21 everything we could from the
+13:22 
+
+13:22 spectrogram. the velocity, the slant
+13:24 
+
+13:24 distance, the time offsets, even the
+13:26 
+
+13:26 absence of the planes between the two.
+13:29 
+
+13:29 There's just not much more we can do.
+13:31 
+
+13:31 So, thanks for watching.
+13:34 
+
+13:34 I'm just kidding. Of course, we're going
+13:35 
+
+13:35 to find it. Remember when I said this?
+13:37 
+
+13:37 So, assuming linear constant velocity,
+13:40 
+
+13:40 there are only two things that determine
+13:42 
+
+13:42 what this Doppler curve looks like and
+13:44 
+
+13:44 this. What you'll notice on this one is
+13:46 
+
+13:46 that it doesn't fit a perfect Doppler
+13:48 
+
+13:48 curve, though.
+13:50 
+
+13:50 The reason they don't fit an ideal
+13:52 
+
+13:52 Doppler curve is because planes don't
+13:54 
+
+13:54 fly in steady, perfectly linear motion.
+13:56 
+
+13:56 They change heading, they speed up, they
+13:58 
+
+13:58 slow down. And all of that info is
+14:01 
+
+14:01 encoded in this Doppler curve. But to
+14:04 
+
+14:04 get it out, we're going to need to go a
+14:06 
+
+14:06 layer even deeper.
+14:10 
+
+14:10 First, we looked at whether a flight
+14:12 
+
+14:12 occurred at this offset. Then, we looked
+14:14 
+
+14:14 at whether a flight of a certain speed
+14:16 
+
+14:16 occurred at this offset at a certain
+14:18 
+
+14:18 distance. Now what we're going to be
+14:20 
+
+14:20 asking is how exactly did that flight
+14:22 
+
+14:22 pass over? Now you can't go from
+14:24 
+
+14:24 spectrogram to knowing the exact flight
+14:27 
+
+14:27 geometry. Multiple things can cause
+14:28 
+
+14:28 variations in this. It could be a change
+14:30 
+
+14:30 in speed, heading, altitude, any
+14:33 
+
+14:33 combination of those. So instead of
+14:35 
+
+14:35 trying to reconstruct what flight
+14:37 
+
+14:37 geometry would have produced this, what
+14:39 
+
+14:39 we can do instead is model what the
+14:41 
+
+14:41 exact Doppler curve would have been for
+14:43 
+
+14:43 the actual flight geometry of each
+14:45 
+
+14:45 flight. We then do this for each
+14:47 
+
+14:47 candidate point on each flight path and
+14:50 
+
+14:50 then we find the one that matches.
+14:53 
+
+14:53 So how do we model a Doppler curve?
+14:58 
+
+14:58 The Doppler curve is a function of the
+14:60 
+
+14:60 radial velocity of the plane with
+15:02 
+
+15:02 respect to the observer. That sounds
+15:03 
+
+15:03 complicated. All it means is how fast
+15:06 
+
+15:06 was the plane moving directly toward or
+15:08 
+
+15:08 away from the observer. So if this is us
+15:11 
+
+15:11 and we're right in front of the plane,
+15:12 
+
+15:12 plane velocity is 90, radial velocity is
+15:15 
+
+15:15 90. If we're directly to the side, plane
+15:17 
+
+15:17 velocity is 90. Radial is basically
+15:19 
+
+15:19 zero. It's not going toward or away from
+15:22 
+
+15:22 us. So at this point, there's no Doppler
+15:24 
+
+15:24 effect. And anywhere in between, we can
+15:26 
+
+15:26 see that red line representing the
+15:28 
+
+15:28 radial component of the plane's
+15:29 
+
+15:29 velocity. You can see here how the
+15:31 
+
+15:31 Doppler curve would change depending on
+15:34 
+
+15:34 the actual flight geometry. So how we'd
+15:36 
+
+15:36 actually create this Doppler curve. What
+15:38 
+
+15:38 we want to know is what frequency did
+15:40 
+
+15:40 the observer hear over time. So we'll
+15:42 
+
+15:42 start at t equals0 or cpa. In this
+15:45 
+
+15:45 specific example from the flight data
+15:47 
+
+15:47 that's 71230. We don't know the actual
+15:50 
+
+15:50 time from the recording. This is just an
+15:51 
+
+15:51 example to illustrate. So for that time
+15:53 
+
+15:53 we go look at the flight data at 71230
+15:56 
+
+15:56 and we get the plane's radial velocity.
+15:58 
+
+15:58 In this case since it's at CPA the
+16:00 
+
+16:00 radial component is zero. But we then
+16:02 
+
+16:02 take that radial component and run it
+16:04 
+
+16:04 through the Doppler equation and it
+16:05 
+
+16:05 outputs a frequency. The Doppler
+16:07 
+
+16:07 equation looks complicated. It's not
+16:09 
+
+16:09 really. C is just a constant for the
+16:11 
+
+16:11 speed of sound. V subr, that's the
+16:13 
+
+16:13 radial component that we just
+16:14 
+
+16:14 calculated. The only other term in here
+16:16 
+
+16:16 is F sub0. That's the fundamental
+16:18 
+
+16:18 frequency and that just comes from here
+16:20 
+
+16:20 where we measure the curve. Just
+16:21 
+
+16:21 remember how we slide this up and down.
+16:24 
+
+16:24 So that's all the components. It outputs
+16:26 
+
+16:26 130 Hz. And then we plot that for 71230.
+16:30 
+
+16:30 Then we just do the same thing again for
+16:31 
+
+16:31 71235.
+16:33 
+
+16:33 Check where the plane is. Get its radial
+16:34 
+
+16:34 velocity 62.7. run that through the
+16:37 
+
+16:37 Doppler equation and get 109.9 and then
+16:40 
+
+16:40 plot that there. If you do that for all
+16:42 
+
+16:42 these points, you end up with the
+16:43 
+
+16:43 Doppler curve for this observer.
+16:45 
+
+16:45 However, that's actually wrong and it
+16:48 
+
+16:48 would make our search fail entirely.
+16:50 
+
+16:50 I'll give you a second to pause and
+16:51 
+
+16:51 think about why. The reason is we want
+16:53 
+
+16:53 to model the frequency heard by the
+16:55 
+
+16:55 observer at each of these times. So, the
+16:58 
+
+16:58 frequency heard by the observer at 71230
+17:01 
+
+17:01 is not based on the plane's radial
+17:03 
+
+17:03 velocity at 712:30.
+17:05 
+
+17:05 It's actually based on the plane's
+17:07 
+
+17:07 velocity when it produced the sound that
+17:09 
+
+17:09 we then hear at 71230. So the correct
+17:12 
+
+17:12 flow is fort equals 0. Find where the
+17:14 
+
+17:14 plane was when it produced that sound.
+17:16 
+
+17:16 Take that radial velocity, run it
+17:18 
+
+17:18 through the Doppler equation, and then
+17:20 
+
+17:20 plot that frequency. And so here's what
+17:22 
+
+17:22 that looks like. Now, if we just do that
+17:24 
+
+17:24 to the end, we're left with two curves.
+17:26 
+
+17:26 One is the wrong way, one is the right
+17:28 
+
+17:28 way. And you might just think, okay,
+17:29 
+
+17:29 sound takes time to travel, so just
+17:31 
+
+17:31 delay the curve. What's the difference?
+17:33 
+
+17:33 It's not just the same curve delayed in
+17:36 
+
+17:36 time. See, if I match up like this
+17:37 
+
+17:37 point, very different curve. Same thing
+17:40 
+
+17:40 over here. Match up that point. So, that
+17:42 
+
+17:42 first methodology didn't just make the
+17:44 
+
+17:44 right curve, but a few seconds late. It
+17:46 
+
+17:46 made an entirely wrong curve. Here's an
+17:48 
+
+17:48 actual example. So, this is our
+17:50 
+
+17:50 specttogram. This is what that wrong
+17:51 
+
+17:51 curve would have plotted versus this is
+17:53 
+
+17:53 the right methodology. So, that's how we
+17:56 
+
+17:56 model this Doppler curve for a given
+17:58 
+
+17:58 observer. We then just repeat this
+17:60 
+
+17:60 process for all the candidate points and
+18:02 
+
+18:02 all of the flights. But what we're left
+18:05 
+
+18:05 with from that is the exact Doppler
+18:07 
+
+18:07 curve that each point would occur based
+18:09 
+
+18:09 on real flight geometry. So then we have
+18:12 
+
+18:12 all these curves. The question is how do
+18:14 
+
+18:14 we score them? So we take the Doppler
+18:16 
+
+18:16 curve, we plot it on a spectrogram, and
+18:18 
+
+18:18 then based on how close it looks, I
+18:20 
+
+18:20 raise up a scorecard kind of like
+18:21 
+
+18:21 gymnastic. I'm just kidding. We do plot
+18:23 
+
+18:23 it on a spectrogram, but we just sum the
+18:25 
+
+18:25 brightness values that each curve
+18:27 
+
+18:27 covers. There's two things we have to
+18:28 
+
+18:28 account for though. One is that the
+18:30 
+
+18:30 fundamental frequency that we used to
+18:32 
+
+18:32 model this curve was based on a
+18:34 
+
+18:34 measurement here. So that could
+18:36 
+
+18:36 introduce some source of error. The
+18:38 
+
+18:38 second is similarly the CPA time is as
+18:40 
+
+18:40 well. So the first thing we have this
+18:43 
+
+18:43 modeled Doppler curve. How do we know
+18:45 
+
+18:45 where to put it on the spectrogram for
+18:46 
+
+18:46 scoring? Well, for the modeled curve, we
+18:48 
+
+18:48 have a delayed CPA point. That's just
+18:50 
+
+18:50 from flight geometry. But remember, we
+18:52 
+
+18:52 don't know the time of filming. So we
+18:54 
+
+18:54 could note the delayed CPA time for this
+18:56 
+
+18:56 flight. But on our spectrogram, we have
+18:58 
+
+18:58 no idea where that is. But we do have
+19:00 
+
+19:00 the CPA time in terms of just the time
+19:02 
+
+19:02 stamp of the audio. So that lets us say
+19:05 
+
+19:05 put the delayed CPA time right at this
+19:07 
+
+19:07 time stamp. But back to what I was
+19:09 
+
+19:09 saying, that is a measurement and it's a
+19:11 
+
+19:11 source of error. So the way we account
+19:12 
+
+19:12 for this is when we place the curve on
+19:14 
+
+19:14 the spectrogram, we do a sweep of a few
+19:17 
+
+19:17 seconds on both of those variables that
+19:19 
+
+19:19 we measured. So the slight time offset
+19:21 
+
+19:21 and then same thing for the fundamental
+19:23 
+
+19:23 frequency and then we just take the
+19:25 
+
+19:25 highest scoring combination of those.
+19:27 
+
+19:27 That's how we score event one here.
+19:29 
+
+19:29 Event two is a little bit different. We
+19:30 
+
+19:30 still do the fundamental frequency sweep
+19:32 
+
+19:32 because that is still a measurement.
+19:34 
+
+19:34 However, event 2's temporal placement
+19:36 
+
+19:36 relative to event one is entirely
+19:38 
+
+19:38 determined by the flight geometry.
+19:41 
+
+19:41 Meaning if we correct for that error
+19:43 
+
+19:43 when we place event one and event two is
+19:45 
+
+19:45 still placed at a bad offset time that
+19:48 
+
+19:48 genuinely just means that this is not a
+19:50 
+
+19:50 good candidate and we want to capture
+19:52 
+
+19:52 that too. So that's the combined locked
+19:54 
+
+19:54 scoring methodology where the offset
+19:57 
+
+19:57 between these two because it's
+19:58 
+
+19:58 determined only by flight geometry is
+20:00 
+
+20:00 entirely locked. We correct for
+20:02 
+
+20:02 measurement error on event one and then
+20:04 
+
+20:04 event two falls wherever it does. That's
+20:07 
+
+20:07 how we eliminate any potential
+20:08 
+
+20:08 measurement error, but still get really
+20:10 
+
+20:10 precise temporal offset scoring. The one
+20:13 
+
+20:13 downside of this is that 200 meter grid
+20:15 
+
+20:15 resolution that we've been using is just
+20:17 
+
+20:17 a little bit too coarse for this. Like
+20:19 
+
+20:19 the actual correct candidate could be up
+20:22 
+
+20:22 to 141 m off and like kind of score
+20:25 
+
+20:25 pretty bad. That's good because it means
+20:27 
+
+20:27 it's really precise, but it also just
+20:29 
+
+20:29 means we have to take our 200 m grid
+20:31 
+
+20:31 points and expand them into 100 m
+20:33 
+
+20:33 resolution and just score more points.
+20:36 
+
+20:36 All of this is done for one candidate
+20:38 
+
+20:38 point. So we need to do this for the
+20:40 
+
+20:40 15,000 times whatever to make them 100
+20:43 
+
+20:43 meter resolution. So probably like 30
+20:45 
+
+20:45 40,000. So super computationally
+20:47 
+
+20:47 expensive and that's why you see all the
+20:49 
+
+20:49 steps we did prior to this to narrow
+20:51 
+
+20:51 down are still extremely important like
+20:53 
+
+20:53 you just could not do this on the full
+20:55 
+
+20:55 US for the full day. So that's the
+20:58 
+
+20:58 entire methodology. I ran this for all
+21:00 
+
+21:00 the points. Let's take a look at the
+21:03 
+
+21:03 results. So each candidate point has an
+21:05 
+
+21:05 event one score and an event two score.
+21:07 
+
+21:07 So I place them on this scatter plot
+21:08 
+
+21:08 here. Higher scores are better. So we're
+21:11 
+
+21:11 looking for things in the top right
+21:12 
+
+21:12 quadrant. So there's some high scoring
+21:14 
+
+21:14 ones here, but there's not really one
+21:15 
+
+21:15 that stands out a ton. But for each
+21:18 
+
+21:18 combination of flight IDs, there's kind
+21:19 
+
+21:19 of a cluster of points. And really
+21:21 
+
+21:21 within each cluster, what we care about
+21:22 
+
+21:22 is the highest scoring point. So I can
+21:24 
+
+21:24 do basically that on the scatter plot,
+21:26 
+
+21:26 group them by flight pair, and then just
+21:28 
+
+21:28 take the highest scoring point for each
+21:30 
+
+21:30 flight pair. And now you can see there
+21:32 
+
+21:32 is one that scores a lot higher. And
+21:34 
+
+21:34 I'll show you the actual spectrograms
+21:36 
+
+21:36 and modeled curves for a couple of these
+21:38 
+
+21:38 top ones. So this high scoring point
+21:40 
+
+21:40 with 20.48.
+21:42 
+
+21:42 That's this one here for event one. I
+21:44 
+
+21:44 mean you can't even see the Doppler
+21:46 
+
+21:46 curve because it's perfectly covered.
+21:48 
+
+21:48 And then for event two, very similar.
+21:51 
+
+21:51 But let's also look at the second best
+21:52 
+
+21:52 scoring one. So you kind of see the
+21:54 
+
+21:54 difference between a 20 versus a 15
+21:56 
+
+21:56 score. So for event one, it's pretty
+21:58 
+
+21:58 close. It misses this top bit right here
+22:01 
+
+22:01 as well as being a little bit off in the
+22:02 
+
+22:02 center. But I mean, as far as event one,
+22:04 
+
+22:04 this is a 95. This is a 10 six. What
+22:07 
+
+22:07 really brings down the score is it's
+22:09 
+
+22:09 event two. And you can see it's event
+22:11 
+
+22:11 two is pretty badly off. But this is the
+22:13 
+
+22:13 second best scoring point. And it's kind
+22:15 
+
+22:15 of similar for three, worse on event
+22:18 
+
+22:18 one, a little bit better on two. Like
+22:20 
+
+22:20 none of these are even close. And then
+22:21 
+
+22:21 first place is spoton. So let's go look
+22:24 
+
+22:24 at this point in CUGIS. So here are the
+22:26 
+
+22:26 scored points. Now that I know the
+22:27 
+
+22:27 flight IDs though, what I can do is run
+22:29 
+
+22:29 much finer resolution with just that
+22:32 
+
+22:32 flight. So like here's the heat map when
+22:33 
+
+22:33 you just score event one. And then for
+22:35 
+
+22:35 event two, you can see its flight path
+22:37 
+
+22:37 and its heat map. And then combined we
+22:40 
+
+22:40 have this.
+22:41 
+
+22:41 But all this has just been dots and
+22:43 
+
+22:43 curves and scores. We still haven't
+22:45 
+
+22:45 found this location. I want to do one
+22:48 
+
+22:48 more thing before we hop into street
+22:49 
+
+22:49 view because this is probably the most
+22:51 
+
+22:51 insane part of the entire project. Do
+22:54 
+
+22:54 you remember this Doppler curve? the one
+22:56 
+
+22:56 that you couldn't hear even when you
+22:57 
+
+22:57 were listening for it. What if you just
+22:59 
+
+22:59 had this one minute clip, but you knew
+23:01 
+
+23:01 the time that it was recorded? Could you
+23:03 
+
+23:03 still find this? So, say I told you this
+23:06 
+
+23:06 was 8:37 p.m. UTC. We could do the same
+23:09 
+
+23:09 spectrogram measurement, get the
+23:11 
+
+23:11 velocity bounce for the flight, but then
+23:13 
+
+23:13 also filter down to only the segments at
+23:16 
+
+23:16 that time. So, that's the view I have
+23:18 
+
+23:18 here. So, here are the scores for that.
+23:20 
+
+23:20 Since it's only one flight, there's no
+23:21 
+
+23:21 scatter plot. It's just a histogram, but
+23:24 
+
+23:24 right hand side is better. And here's
+23:25 
+
+23:25 the view if you only take the highest
+23:27 
+
+23:27 scoring point per flight. So, we have a
+23:29 
+
+23:29 couple high scoring points here. And
+23:30 
+
+23:30 here's the spectrograms. I did one thing
+23:33 
+
+23:33 slightly different on this, which is
+23:35 
+
+23:35 because this Doppler curve is so faint,
+23:38 
+
+23:38 I just kind of traced it with a line and
+23:39 
+
+23:39 then scored each candidate's curve based
+23:41 
+
+23:41 on how close it was to that line rather
+23:44 
+
+23:44 than based on the actual brightness. So,
+23:46 
+
+23:46 the top scoring point is spot on. Second
+23:48 
+
+23:48 place is close, but I mean, you can
+23:49 
+
+23:49 definitely see where it's off. And
+23:51 
+
+23:51 beyond that, it gets pretty bad. But
+23:53 
+
+23:53 what you might notice about this
+23:54 
+
+23:54 coordinate, if we go back to our
+23:55 
+
+23:55 original two event scoring, the highest
+23:57 
+
+23:57 scoring point 40.87
+23:60 
+
+23:60 40.8735
+24:03 
+
+24:03 735
+24:05 
+
+24:05 the same location scoring first by a
+24:08 
+
+24:08 significant margin across two different
+24:10 
+
+24:10 methodologies with entirely different
+24:12 
+
+24:12 flights. And if I were to generalize
+24:14 
+
+24:14 this, you can kind of pick two things
+24:15 
+
+24:15 here that are bad. So, in our first
+24:17 
+
+24:17 example, we didn't know what time the
+24:19 
+
+24:19 video was filmed or where in the US, but
+24:21 
+
+24:21 we had two flights. In the second
+24:23 
+
+24:23 example, we only had one flight. We
+24:24 
+
+24:24 still did the full US search, but we had
+24:26 
+
+24:26 a much tighter temporal constraint. So,
+24:28 
+
+24:28 you kind of just need one of these
+24:29 
+
+24:29 things to be good. The thing is, though,
+24:31 
+
+24:31 I've never had a search where all I knew
+24:33 
+
+24:33 was that it was just somewhere in the
+24:35 
+
+24:35 US. You typically know a city or a state
+24:38 
+
+24:38 or even, oh, okay, I'm looking north at
+24:39 
+
+24:39 some body of water. Like I chose this
+24:41 
+
+24:41 picture just to demonstrate the extremes
+24:43 
+
+24:43 of like even knowing absolutely nothing,
+24:45 
+
+24:45 you can still find the location. If you
+24:47 
+
+24:47 knew the city, a city is like 01% of the
+24:50 
+
+24:50 land area. So when you constrain the
+24:52 
+
+24:52 spatial bounds that much, it allows you
+24:54 
+
+24:54 to open up the temporal bounds and you
+24:56 
+
+24:56 don't need to know the minute or the
+24:57 
+
+24:57 hour or even the day of filming. I just
+24:60 
+
+24:60 want you to grasp how powerful this is.
+25:02 
+
+25:02 We got the location of that recording
+25:04 
+
+25:04 within a couple hundred feet from 1
+25:06 
+
+25:06 minute of audio where you cannot hear
+25:09 
+
+25:09 the plane. And I mean, these flyovers
+25:11 
+
+25:11 happen all the time. And those
+25:13 
+
+25:13 frequencies go through walls. Like any
+25:15 
+
+25:15 video you take could have that in there.
+25:18 
+
+25:18 But anyway, we still have not found this
+25:20 
+
+25:20 exact photo. So, let's go back here in
+25:22 
+
+25:22 CUGIS. I'll zoom into kind of the center
+25:24 
+
+25:24 of this. I mean, it's honestly in water,
+25:26 
+
+25:26 so it'll be like right on this bank.
+25:27 
+
+25:27 Grab this coordinate and let's take a
+25:29 
+
+25:29 look in Google Maps and let's see what
+25:30 
+
+25:30 we got for street view.
+25:33 
+
+25:33 All right, let's zoom in here. So, what
+25:34 
+
+25:34 we're looking at is a super pixelated
+25:36 
+
+25:36 tree line, and we kind of want this
+25:37 
+
+25:37 V-shaped tree followed by a point, and
+25:40 
+
+25:40 then this big rounded part. So, from
+25:42 
+
+25:42 this location, nothing really that way.
+25:46 
+
+25:46 I'm not seeing any V-shaped trees here.
+25:50 
+
+25:50 Here's kind of one, but we needed to go
+25:52 
+
+25:52 up into the right.
+25:55 
+
+25:55 There's one more here where we have this
+25:57 
+
+25:57 Vshape with a point and then this
+25:59 
+
+25:59 rounded part. Here they are side by
+26:01 
+
+26:01 side. And if I zoom out and look at the
+26:04 
+
+26:04 top of this pole, here is the exact
+26:06 
+
+26:06 security camera that took this footage.
+26:09 
+
+26:09 So, how do you protect yourself? Well,
+26:11 
+
+26:11 the first thing people might think is a
+26:13 
+
+26:13 highp pass filter. There are two reasons
+26:15 
+
+26:15 that this doesn't work. First, the
+26:17 
+
+26:17 frequencies of these Doppler curves are
+26:19 
+
+26:19 pretty much the same frequencies of the
+26:20 
+
+26:20 human voice. You'd be removing a good
+26:22 
+
+26:22 chunk of what you actually want to
+26:23 
+
+26:23 record. Second, depending on how you
+26:26 
+
+26:26 highpass, it might not even work anyway.
+26:28 
+
+26:28 So, say this is my recording. I have the
+26:30 
+
+26:30 Doppler curve here. I'll apply the highp
+26:32 
+
+26:32 pass and cut off the Doppler curve. I'll
+26:34 
+
+26:34 export this as an MP3. Open that MP3.
+26:38 
+
+26:38 And the Doppler curve is completely
+26:39 
+
+26:39 gone. Now, let me just boost all the
+26:42 
+
+26:42 frequencies. And the curve is back.
+26:45 
+
+26:45 The next thing you might think, well, I
+26:46 
+
+26:46 would be talking during my video.
+26:48 
+
+26:48 There'd be other loud things going on,
+26:50 
+
+26:50 so the mic would pick up on that, not
+26:52 
+
+26:52 background plane sounds. What if I told
+26:55 
+
+26:55 you for the past 15 seconds I've had a
+26:57 
+
+26:57 JBL speaker across the room playing a
+26:60 
+
+26:60 Doppler curve?
+27:03 
+
+27:03 So, highpass doesn't work. You can't
+27:05 
+
+27:05 drown it out. One thing that works is
+27:07 
+
+27:07 just making cuts. That way, you can't
+27:09 
+
+27:09 use the time offset between these. But
+27:11 
+
+27:11 remember when we found the location with
+27:13 
+
+27:13 just 1 minute of audio? If it's a large
+27:15 
+
+27:15 search area, you might need to know the
+27:17 
+
+27:17 pretty precise time of recording. And
+27:18 
+
+27:18 you might think, when are you ever going
+27:20 
+
+27:20 to know the exact time of a recording?
+27:23 
+
+27:23 How about any phone call you've ever
+27:25 
+
+27:25 had? But phone calls compress audio.
+27:27 
+
+27:27 They apply noise reduction. Surely a
+27:29 
+
+27:29 Doppler curve won't survive that.
+27:33 
+
+27:33 >> Right now, you're listening through
+27:34 
+
+27:34 another phone speaker under a bunch of
+27:36 
+
+27:36 squish follows. I'm in a different room
+27:38 
+
+27:38 with that same JBL speaker playing
+27:40 
+
+27:40 Doppler curve. Just to verify there's no
+27:43 
+
+27:43 leakage, I'm going to go on mute.
+27:48 
+
+27:48 So if the Doppler curve was going
+27:50 
+
+27:50 through the phone and only through the
+27:51 
+
+27:51 phone, what you should have seen there
+27:53 
+
+27:53 was a gap in the Doppler curve and then
+27:55 
+
+27:55 when I started talking again, it came
+27:57 
+
+27:57 back.
+27:59 
+
+27:59 So highpass doesn't work. You can't
+28:01 
+
+28:01 drown it out and it can survive phone
+28:03 
+
+28:03 compression. So what can you actually
+28:05 
+
+28:05 do? Like I said, you could make cuts in
+28:07 
+
+28:07 your videos or apply some additional
+28:09 
+
+28:09 noise cancellation. But look, I'm not
+28:11 
+
+28:11 trying to fearmonger with this video.
+28:12 
+
+28:12 The odds that someone can and does
+28:14 
+
+28:14 actually do this is pretty slim. In
+28:16 
+
+28:16 reality, there's probably a hundred
+28:18 
+
+28:18 easier ways to find you than this. The
+28:20 
+
+28:20 one real use case I could see, I mean,
+28:22 
+
+28:22 the audio we used is just from some
+28:24 
+
+28:24 random security camera, but it could
+28:26 
+
+28:26 have just as well been footage from a
+28:29 
+
+28:29 investigation or a video online.
+28:32 
+
+28:32 Something with literally zero visual
+28:34 
+
+28:34 clues could be located using this. And
+28:38 
+
+28:38 maybe that makes you feel optimistic,
+28:40 
+
+28:40 maybe a bit uneasy, or maybe like me,
+28:43 
+
+28:43 you just find all this fascinating. That
+28:45 
+
+28:45 when you hear a plane fly over, you're
+28:47 
+
+28:47 probably in the only place on Earth
+28:49 
+
+28:49 hearing that exact curve. And all the
+28:52 
+
+28:52 information needed to recreate that
+28:54 
+
+28:54 exists. And 30 minutes ago, all of this
+29:01 
+
+29:01 was just background noise.

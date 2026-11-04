@@ -10,6 +10,7 @@ recording picks out the spot (and the clock offset) that explains them best.
 
 The method is from colsto's video
 [*"This background sound leaks your exact location"*](https://www.youtube.com/watch?v=UytYrhYLOKI).
+The [user-provided transcript](docs/video-transcript.txt) is included with its original timestamps and wording.
 This repo is an independent test harness for it: a synthetic control first, then live YouTube
 webcams recorded alongside live ADS-B.
 
