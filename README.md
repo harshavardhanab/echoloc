@@ -23,6 +23,7 @@ Full write-up: [echoloc/RESULTS.md](echoloc/RESULTS.md).
 | Heathrow webcam, 25 min live, blind 14 × 14 km search | best guess **6.1 km** off; true spot ranked 113–226 of 5041 |
 | Midway webcam, 25 min live, blind | best guess **1.3–2.3 km** off; true spot ranked ~120 of 5041 |
 | Lisbon webcam, 25 min live, blind | a deliberately wrong clock scored higher than the real one |
+| SWFL eagle cam (prop traffic), 3 h rewind, dopplertrack pair search | no location: 64 km off, rejected by the timestamp check; only 1 non-jet pass within 2 km in 3 h |
 
 Verdict: **it confirms a suspected location but does not find an unknown one** from 25 minutes
 of airport-webcam audio. At the true spots the matched filter clearly picks out individual flights
@@ -30,6 +31,10 @@ of airport-webcam audio. At the true spots the matched filter clearly picks out 
 along the same runway corridors are not enough to stand out against ~186,000
 (position, stream-delay) hypotheses. Every blind result is checked against a deliberately wrong
 clock (+397 s); that null test is what exposed the failure.
+
+A 3-hour prop-traffic follow-up with dopplertrack's flyover-first pair search also failed. Almost
+no ADS-B-visible light aircraft passed near the camera in that window, and the blind answer
+(64 km off) was caught only by checking it against the stream's own timestamps.
 
 ## How it works
 
@@ -73,6 +78,12 @@ Live webcams (cams are defined in `cams.json`):
 ../.venv/bin/python rescore.py lhr mdw lis --topk 3
 ```
 
+Past audio from a 24/7 YouTube live stream (up to ~5 days back, with exact wall-clock stamps):
+
+```bash
+../.venv/bin/python rewind_capture.py YGaF2La0A9o --from 2026-11-02T15:00:00Z --hours 3 --name swfl/swfl_1102
+```
+
 Your own recording:
 
 ```bash
@@ -93,6 +104,8 @@ Outputs go to `echoloc/data/`, which is not committed.
 | `echoloc/locate.py` | Matched-filter grid search, noise calibration, score tables |
 | `echoloc/run_synthetic.py` | Synthetic control experiment |
 | `echoloc/live_capture.py` | Records webcam audio and ADS-B side by side |
+| `echoloc/rewind_capture.py` | Pulls a past window of a YouTube live stream's audio, with per-segment wall-clock stamps |
+| `echoloc/check_passes.py` | Detected flyovers vs ADS-B passes at a known spot, with a slid-clock null (runs in dopplertrack's env) |
 | `echoloc/poll_cams.py` | Standalone ADS-B poller (superseded by `live_capture.py`) |
 | `echoloc/run_clip.py` | Locates one recording |
 | `echoloc/run_live.py` | Runs `run_clip.py` on each live capture |
@@ -111,8 +124,8 @@ Outputs go to `echoloc/data/`, which is not committed.
 
 Both drop or down-rank jets and work from detected flyovers rather than scoring every flight at
 every point. That is the most likely reason they succeed where this repo's airport-webcam test
-did not. The next test worth running here is a 2–3 hour capture from a webcam with frequent
-propeller traffic.
+did not. A 3-hour run of dopplertrack on a prop-traffic cam also found nothing, for lack of nearby
+ADS-B-visible traffic (see [RESULTS.md](echoloc/RESULTS.md)); its own eagle-cam success used 12 h.
 
 ## Responsible use
 
