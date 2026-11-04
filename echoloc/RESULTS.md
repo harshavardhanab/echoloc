@@ -38,31 +38,35 @@ detected flyovers first, prop-only ADS-B, and exact timestamps.
 
 - Audio: SWFL Eagle Cam (North Fort Myers, FL, known spot 26.7024, −81.8478), 3 h from
   2026-11-02 15:00 UTC, pulled from the live stream's ~5-day DASH rewind by `rewind_capture.py`.
-  2160/2160 segments, none missing; each segment's `Ingestion-Walltime-Us` gives the wall clock
-  (stamps jitter by a few seconds around two stream hiccups but stay on the nominal 5 s grid).
+  2160/2160 segments, none missing; each segment's `Ingestion-Walltime-Us` gives the wall clock.
+  The media timeline is gap-free, but the stamps step ahead of it four times (2.1, 1.0, 3.7,
+  1.8 s): the encoder dropped audio. Plain concatenation drifted 9.4 s by the end, so the WAV is
+  rebuilt with silence at each step; audio time now matches the stamps to ±0.1 s (p5–p95).
 - ADS-B: adsb.lol day archive via `dopplertrack fetch-day`, 130 × 130 km box: 1115 traces,
   147 after dropping known jets. (Needed a one-line fix to dopplertrack's asset sort.)
 - Flyovers: `dopplertrack detect --band 60 300 --top 25`.
 
 | Check | Result |
 |---|---|
-| Non-jet passes heard at the nest in 3 h | 2 within 4 km, 11 within 12 km; only one (a helicopter, AS50) within 2 km |
-| Detections that line up with a real pass | 2 of 25 (±5 s); slid-clock null p ≈ 0.04, at ±15 s p ≈ 0.2 |
-| Helicopter detection | 0.3 s from the ADS-B-predicted time, but its track has a 20 min gap around CPA, so that position is interpolated |
-| Strongest 5 detections | no ADS-B pass within 12 km: aircraft without ADS-B in the archive, or not aircraft |
-| Known-point check (`search --point`), top-2 pair and best real pair | 0 candidates: fitted speeds/distances (e.g. 161 m/s at 542 m vs 1.8 km real) fall outside dopplertrack's ±35 % / 0.4–2.5× gates |
-| Blind pair search, Nov 2 traces | best score 8.38, **64 km** off (Naples); implies the clock is off by −4.4 h vs the segment stamps → rejected |
-| Wrong-day null, Nov 1 traces | best score 6.68, 64 km off; implies −19.9 h → rejected |
+| Measured non-jet approaches heard at the nest in 3 h | **none within 2 km**; 1 within 4 km (P28A, 3.5 km); 16 within 12 km (repeat passes counted, tracks split at ADS-B gaps > 60 s) |
+| Detections that line up with a real approach | 1 of 25 within ±5 s, 3 within ±30 s; slid-clock null p ≈ 0.4–0.5, i.e. chance |
+| Helicopter (AS50) | a first pass at the gap-free audio looked like a 1.8 km match, but that CPA was interpolated across a 20 min ADS-B gap; its only measured approach (2.6 km) sits at the edge of another gap and is excluded |
+| Strongest 5 detections | no ADS-B approach within 12 km: aircraft without ADS-B in the archive, or not aircraft |
+| Known-point check (`search --point`), top-2 pair | 0 candidates: the fitted speeds/distances fall outside dopplertrack's ±35 % / 0.4–2.5× gates for every real flight |
+| Blind pair search, Nov 2 traces | best score 7.99, **14.7 km** off; implies the clock is off by −1.1 h vs the segment stamps → rejected |
+| Wrong-day null, Nov 1 traces | best score 7.92 (as high as the real day), 16.1 km off; implies −27.4 h → rejected |
 
 Verdict: **no location from this window.** It failed at the input, not the search: in this 3 h
-weekday-morning window almost no ADS-B-visible light aircraft passed close to the camera, and the
-loud flyovers that were detected are not in the ADS-B archive. The blind search still produced a
-confident-looking answer, and only the timestamp check exposed it. Any blind result should be
+weekday-morning window no ADS-B-visible light aircraft was measured passing within 2 km of the
+camera, and the loud flyovers that were detected are not in the ADS-B archive. The blind search
+still produced a confident-looking answer (the wrong day's data scored as well), and the
+timestamp check rejects it. Any blind result should be
 checked against the recording's own clock. dopplertrack's eagle-cam success used 12 h of audio;
 a fair retest needs a longer window (or several) and a camera under a busier pattern.
 
 Reproduce:
     ../.venv/bin/python rewind_capture.py YGaF2La0A9o --from 2026-11-02T15:00:00Z --hours 3 --name swfl/swfl_1102
+    # (or --rebuild --name swfl/swfl_1102 to redo the WAV/timeline from a saved .m4a)
     cd ../third_party/dopplertrack
     uv run --frozen dopplertrack spectrogram ../../echoloc/data/swfl/swfl_1102.wav ../../echoloc/data/swfl/swfl_1102_spec.npz
     uv run --frozen dopplertrack detect ../../echoloc/data/swfl/swfl_1102_spec.npz --band 60 300 --top 25 --out ../../echoloc/data/swfl/detected.json

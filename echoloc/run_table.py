@@ -33,6 +33,9 @@ tracks = adsb.load_adsblol_log(f"data/live_{a.cam}.jsonl", ground_alt_m=elev)
 spec = LogSpec(load_audio(f"data/live_{a.cam}.wav"))
 loc = Locator(spec, tracks, frame, meta["wall_start"] - 30)
 cal = loc.calibrate(a.half_km * 1000, elev + 1.5)
+if loc.cal is None:
+    raise SystemExit(f"{a.cam}: only {len(cal)} wrong-clock noise samples; too few to calibrate "
+                     "(record longer, or poll ADS-B for ~15 min either side of the audio)")
 print(f"{a.cam}: {len(loc.pieces)} track pieces; noise z p50 {np.median(cal):.2f} p99 {np.percentile(cal, 99):.2f}")
 offsets = list(np.arange(-36, 36.1, 2.0))
 obs, shape = loc.grid(0, 0, a.half_km * 1000, a.step, elev + 1.5)

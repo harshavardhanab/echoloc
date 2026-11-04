@@ -23,7 +23,7 @@ Full write-up: [echoloc/RESULTS.md](echoloc/RESULTS.md).
 | Heathrow webcam, 25 min live, blind 14 × 14 km search | best guess **6.1 km** off; true spot ranked 113–226 of 5041 |
 | Midway webcam, 25 min live, blind | best guess **1.3–2.3 km** off; true spot ranked ~120 of 5041 |
 | Lisbon webcam, 25 min live, blind | a deliberately wrong clock scored higher than the real one |
-| SWFL eagle cam (prop traffic), 3 h rewind, dopplertrack pair search | no location: 64 km off, rejected by the timestamp check; only 1 non-jet pass within 2 km in 3 h |
+| SWFL eagle cam (prop traffic), 3 h rewind, dopplertrack pair search | no location: 14.7 km off, rejected by the timestamp check; no measured non-jet pass within 2 km in 3 h |
 
 Verdict: **it confirms a suspected location but does not find an unknown one** from 25 minutes
 of airport-webcam audio. At the true spots the matched filter clearly picks out individual flights
@@ -34,7 +34,7 @@ clock (+397 s); that null test is what exposed the failure.
 
 A 3-hour prop-traffic follow-up with dopplertrack's flyover-first pair search also failed. Almost
 no ADS-B-visible light aircraft passed near the camera in that window, and the blind answer
-(64 km off) was caught only by checking it against the stream's own timestamps.
+(14.7 km off) was caught only by checking it against the stream's own timestamps.
 
 ## How it works
 
@@ -82,7 +82,11 @@ Past audio from a 24/7 YouTube live stream (up to ~5 days back, with exact wall-
 
 ```bash
 ../.venv/bin/python rewind_capture.py YGaF2La0A9o --from 2026-11-02T15:00:00Z --hours 3 --name swfl/swfl_1102
+../.venv/bin/python rewind_capture.py --rebuild --name swfl/swfl_1102   # redo the WAV from the saved .m4a
 ```
+
+The WAV is placed on the stream's wall clock: wall time = `t0` + audio seconds, with silence
+inserted where the encoder dropped audio (`data/<name>.meta.json` holds `t0` and the timeline).
 
 Your own recording:
 
@@ -104,7 +108,7 @@ Outputs go to `echoloc/data/`, which is not committed.
 | `echoloc/locate.py` | Matched-filter grid search, noise calibration, score tables |
 | `echoloc/run_synthetic.py` | Synthetic control experiment |
 | `echoloc/live_capture.py` | Records webcam audio and ADS-B side by side |
-| `echoloc/rewind_capture.py` | Pulls a past window of a YouTube live stream's audio, with per-segment wall-clock stamps |
+| `echoloc/rewind_capture.py` | Pulls a past window of a YouTube live stream's audio onto a wall-clock timeline (silence where the encoder dropped audio) |
 | `echoloc/check_passes.py` | Detected flyovers vs ADS-B passes at a known spot, with a slid-clock null (runs in dopplertrack's env) |
 | `echoloc/poll_cams.py` | Standalone ADS-B poller (superseded by `live_capture.py`) |
 | `echoloc/run_clip.py` | Locates one recording |

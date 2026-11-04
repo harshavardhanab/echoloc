@@ -14,7 +14,7 @@ from datetime import datetime
 import numpy as np
 
 import adsb
-from locate import Locator
+from locate import WRONG_CLOCKS, Locator
 from physics import Frame
 from spec import LogSpec, load_audio
 
@@ -40,14 +40,20 @@ elev = adsb.ground_elevation(clat, clon)
 if a.adsblol_log:
     tracks = adsb.load_adsblol_log(a.adsblol_log, ground_alt_m=elev, geoid_m=a.geoid)
 else:
-    tracks = adsb.fetch_aero(clat, clon, (a.search_km + 8) * 1000, t0 - a.clock_err - 300,
-                             t0 + a.clock_err + dur + 300,
-                             cache=f"data/aero_{clat:.3f}_{clon:.3f}_{int(t0)}_{int(dur)}.json")
+    # cover the wrong clocks used for noise calibration and the +397 s null as well
+    span = max(abs(w) for w in WRONG_CLOCKS + (397.0,)) + a.clock_err + 300
+    t_lo, t_hi = t0 - span, t0 + dur + span
+    tracks = adsb.fetch_aero(clat, clon, (a.search_km + 8) * 1000, t_lo, t_hi,
+                             cache=f"data/aero_{clat:.3f}_{clon:.3f}_{int(t_lo)}_{int(t_hi)}.json")
 print(f"{len(tracks)} tracks")
 spec = LogSpec(x)
 loc = Locator(spec, tracks, frame, t0)
 cal = loc.calibrate(a.search_km * 1000, elev + 1.5)
-print("noise z (wrong clocks): n=%d p50 %.2f p90 %.2f p99 %.2f" % (len(cal), *np.percentile(cal, [50, 90, 99])))
+if loc.cal is not None:
+    print("noise z (wrong clocks): n=%d p50 %.2f p90 %.2f p99 %.2f" % (len(cal), *np.percentile(cal, [50, 90, 99])))
+else:
+    print(f"noise calibration skipped: only {len(cal)} wrong-clock samples (short clip or sparse tracks); "
+          "using the uncalibrated rule, so scores are not comparable with calibrated runs")
 offsets = list(np.arange(-a.clock_err, a.clock_err + 0.1, 2.0))
 res = loc.search(0, 0, a.search_km * 1000, elev + 1.5, offsets)
 null = loc.search(0, 0, a.search_km * 1000, elev + 1.5, [o + 397 for o in offsets], top=1)

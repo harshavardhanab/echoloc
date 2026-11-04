@@ -13,6 +13,26 @@ from physics import doppler, resample_track
 Z_NOISE = 3.5     # typical max-over-f0 z for a curve that matches nothing (synthetic noise)
 Z_FLOOR = -2.0    # a single missed aircraft can cost at most this much (occlusion / quiet jets)
 CAL_FLOOR = -1.0  # same cap, in calibrated units (log10 of tail-probability ratio)
+QUIET_M = 1500.0  # calibrated scoring: a miss only costs when the aircraft passed this close
+WRONG_CLOCKS = (503.0, -611.0, 733.0, -859.0)  # s; offsets used to sample noise
+MIN_CAL = 30      # fewer wrong-clock samples than this and calibration is not trusted
+
+
+def contrib(z, cpa, cal=None, quiet_m=QUIET_M, floor=CAL_FLOOR):
+    """Score contribution of events with curve z and CPA slant range cpa (arrays or scalars).
+
+    Uncalibrated (cal None): z above the synthetic noise level, every miss capped at Z_FLOOR.
+    Calibrated: log10(0.1 / p_tail(z)) against the wrong-clock noise sample cal (sorted);
+    positive only above the noise 90th percentile, and a weak event costs (at most floor) only
+    when the aircraft passed within quiet_m, since farther ones are often inaudible.
+    This one function is used by direct scoring, cached tables and rescore.py alike."""
+    z = np.asarray(z, float)
+    if cal is None:
+        return np.maximum(z - Z_NOISE, Z_FLOOR)
+    n = len(cal)
+    p = (n - np.searchsorted(cal, z, side="left") + 1) / (n + 1)
+    c = np.log10(0.1 / p)
+    return np.where(c >= 0, c, np.where(np.asarray(cpa) < quiet_m, np.maximum(c, floor), 0.0))
 
 
 def curve_z(spec, ta_rel, lnr, frame_step=4):
@@ -37,13 +57,14 @@ def curve_z(spec, ta_rel, lnr, frame_step=4):
 
 class Locator:
     def __init__(self, spec, tracks, frame, t_audio0, c=340.0, r_hear=8000.0, r_win=4000.0,
-                 max_half_s=60.0, min_swing=0.0):
+                 max_half_s=60.0, min_swing=0.0, quiet_m=QUIET_M):
         self.spec, self.frame, self.t0, self.c = spec, frame, t_audio0, c
         self.r_hear, self.r_win, self.max_half = r_hear, r_win, max_half_s
         # curves whose ln-frequency barely changes carry no position information but still
         # match any steady tone; skip events whose modelled Doppler swing is below this
         self.min_swing = min_swing
         self.cal = None
+        self.quiet_m = quiet_m
         self.pieces = []
         for tr in tracks:
             for tt, P, V in resample_track(tr, frame):
@@ -63,25 +84,29 @@ class Locator:
             if hear.any():
                 yield i, hear, ta, lnr, R
 
-    def calibrate(self, half, z_obs, wrong=(503.0, -611.0, 733.0, -859.0), n=60, seed=0):
+    def calibrate(self, half, z_obs, wrong=WRONG_CLOCKS, n=60, seed=0, min_n=MIN_CAL):
         """Learn this recording's noise distribution of curve z from deliberately wrong clocks.
 
         Real audio is full of tones, so a curve that matches nothing still scores z ~ 3-4 with a
         heavy tail; afterwards each event scores log10(0.1 / p_tail(z)): positive only above the
         noise 90th percentile, and an aircraft that should be heard but is not costs a little.
+
+        Needs track data covering the wrong clocks too (t_audio0 + wrong offsets). With fewer
+        than min_n noise samples (a short clip, sparse traffic, tracks fetched too narrowly)
+        calibration is refused: self.cal stays None, scoring uses the uncalibrated rule, and
+        the (possibly empty) sample is returned so the caller can report it.
         """
+        self.cal = None
         rng = np.random.default_rng(seed)
         pts = np.c_[rng.uniform(-half, half, n), rng.uniform(-half, half, n), np.full(n, z_obs)]
         _, info = self.score(pts, list(wrong), detail=True)
-        self.cal = np.sort([e["z"] for p in info for es in p for e in es])
-        return self.cal
+        cal = np.sort([e["z"] for p in info for es in p for e in es])
+        if len(cal) >= min_n:
+            self.cal = cal
+        return cal
 
-    def _contrib(self, z):
-        if self.cal is None:
-            return max(z - Z_NOISE, Z_FLOOR)
-        n = len(self.cal)
-        p = (n - np.searchsorted(self.cal, z, side="left") + 1) / (n + 1)
-        return max(np.log10(0.1 / p), CAL_FLOOR)
+    def _contrib(self, z, cpa):
+        return float(contrib(z, cpa, self.cal, self.quiet_m))
 
     def table(self, obs, offsets):
         """Every (point, offset, event) z in one pass: arrays m, o, z, cpa_m, piece.
@@ -104,13 +129,9 @@ class Locator:
         out.update(M=len(obs), O=len(offsets))
         return out
 
-    def score_table(self, tab, quiet_m=1500.0):
-        """Calibrated score per (point, offset). A miss only costs when the aircraft passed
-        within quiet_m (farther ones are often inaudible over wind/traffic)."""
-        n = len(self.cal)
-        p = (n - np.searchsorted(self.cal, tab["z"], side="left") + 1) / (n + 1)
-        c = np.log10(0.1 / p)
-        c = np.where(c >= 0, c, np.where(tab["cpa"] < quiet_m, np.maximum(c, CAL_FLOOR), 0.0))
+    def score_table(self, tab, quiet_m=None):
+        """Score per (point, offset) from a cached table, by the same rule as score()."""
+        c = contrib(tab["z"], tab["cpa"], self.cal, self.quiet_m if quiet_m is None else quiet_m)
         S = np.zeros(tab["M"] * tab["O"])
         np.add.at(S, tab["m"] * tab["O"] + tab["o"], c)
         return S.reshape(tab["M"], tab["O"])
@@ -122,7 +143,7 @@ class Locator:
         info = [[[] for _ in offsets] for _ in range(M)] if detail else None
 
         def add(m, o, i, z, cpa, cpa_rel):
-            S[m, o] += self._contrib(z)
+            S[m, o] += self._contrib(z, cpa)
             if detail:
                 info[m][o].append({"piece": i, "callsign": self.pieces[i][0]["callsign"],
                                    "type": self.pieces[i][0]["type"], "z": round(float(z), 2),

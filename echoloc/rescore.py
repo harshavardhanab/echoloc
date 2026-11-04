@@ -6,6 +6,7 @@ import argparse
 
 import numpy as np
 
+from locate import contrib
 from physics import Frame
 
 ap = argparse.ArgumentParser()
@@ -18,10 +19,7 @@ a = ap.parse_args()
 
 def scores(d, pre, cal):
     z, cpa = d[pre + "z"], d[pre + "cpa"]
-    n = len(cal)
-    p = (n - np.searchsorted(cal, z, side="left") + 1) / (n + 1)
-    c = np.log10(0.1 / p)
-    c = np.where(c >= 0, c, np.where(cpa < a.quiet, np.maximum(c, a.floor), 0.0))
+    c = contrib(z, cpa, cal, a.quiet, a.floor)
     M, O = int(d[pre + "M"]), int(d[pre + "O"])
     key = d[pre + "m"] * O + d[pre + "o"]
     if a.topk:
