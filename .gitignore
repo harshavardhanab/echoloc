@@ -1,0 +1,13 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Captured audio, ADS-B logs and search tables: large, and the audio belongs to the stream owners
+echoloc/data/*
+!echoloc/data/.gitkeep
+
+# Other projects cloned for comparison (linked from the README)
+third_party/
+
+.DS_Store

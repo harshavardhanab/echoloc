@@ -1,0 +1,68 @@
+{
+ "lhr": {
+  "id": "SgvpyjQX_HM",
+  "at": [
+   51.47,
+   -0.4543
+  ],
+  "truth": [
+   51.4644,
+   -0.423
+  ],
+  "note": "Myrtle Avenue, end of 27L (FR24/BigJetTV) (truth approx, +-150 m)",
+  "feed": "adsb.fi"
+ },
+ "mdw": {
+  "id": "67BCsiW-1Io",
+  "at": [
+   41.7868,
+   -87.7522
+  ],
+  "truth": [
+   41.77844,
+   -87.74278
+  ],
+  "note": "Pro Auto, SE corner of runways 31L/C/R (coords from description)",
+  "feed": "adsb.lol"
+ },
+ "msy": {
+  "id": "iZRbml7fnXI",
+  "at": [
+   29.9934,
+   -90.258
+  ],
+  "truth": null,
+  "note": "FR24 cam at MSY, exact spot unknown"
+ },
+ "hnd": {
+  "id": "2PIdi3Xa7TY",
+  "at": [
+   35.5494,
+   139.7798
+  ],
+  "truth": [
+   35.5502,
+   139.788
+  ],
+  "note": "Haneda Terminal 2 (approx)"
+ },
+ "lis": {
+  "id": "OZsGOSZqqzs",
+  "at": [
+   38.7742,
+   -9.1342
+  ],
+  "truth": null,
+  "note": "Aviacao TV Lisbon, exact spot unknown",
+  "feed": "adsb.fi"
+ },
+ "ace": {
+  "id": "AAlo3eCPVbk",
+  "at": [
+   28.9455,
+   -13.6052
+  ],
+  "truth": null,
+  "note": "Lanzarote airport webcam, exact spot unknown"
+ }
+}
