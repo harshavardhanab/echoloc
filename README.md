@@ -131,8 +131,17 @@ Outputs go to `echoloc/data/`, which is not committed.
 - [mjshiggins/dopplertrack](https://github.com/mjshiggins/dopplertrack): Python; detects
   flyovers, then searches flight pairs. 43 m on colsto's Oyster Bay clip and 592 m on a 12-hour
   eagle-cam stream near a flight school.
+- [1337isnot1337/DOPPLERGEIST](https://github.com/1337isnot1337/DOPPLERGEIST)
+  ([PyPI: dopplergeist](https://pypi.org/project/dopplergeist/), `pipx install dopplergeist`):
+  Python CLI and local web app. It detects moving tones and groups harmonics into flyovers,
+  pulls adsb.lol history while tracking archive gaps, and ranks candidate locations across
+  several flyovers, with "inconclusive" as an allowed answer. Its own reported results are
+  cautious: 476 m from an inferred (not surveyed) reference in a constrained Livermore search,
+  and no candidate within 1 km on three of five public field recordings. It states that blind
+  accuracy on real recordings has not been established. Licensed PolyForm Noncommercial 1.0.0
+  (earlier releases were MIT).
 
-Both drop or down-rank jets and work from detected flyovers rather than scoring every flight at
+dopplerprint and dopplertrack both drop or down-rank jets and work from detected flyovers rather than scoring every flight at
 every point. That may be why they succeed where this repo's airport-webcam test did not. A
 3-hour run of dopplertrack on a prop-traffic cam also gave no supported location, with no
 non-jet ADS-B approach measured within 2 km (see [RESULTS.md](echoloc/RESULTS.md)); its own
